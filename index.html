@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_blank">
+    <style>
+      body {
+        background-color:white;
+        font-color: whate;
+        text-align: center;
+        overflow-y: auto;
+        font-family: "Arial","メイリオ";
+      }
+
+      #reader {
+        margin: 0 auto;
+        text-align: center;
+        margin-top: 10px;
+      }
+      
+      #result {
+        font-size: 16px;
+        color: green;
+        margin-top: 10px;
+      }
+
+      #guide{
+        text-align: left;
+        margin-left: 300px;
+        margin-bottom: 200px;
+      }
+
+    </style>
+  
+  <body>
+    <h1>QRコード出席管理システム</h1>
+    <div id="reader" style="width:600px;"></div>
+    <div id="guide">
+    <h3>操作手順</h3>
+    <h4>1.『Request Camera Permissions』をクリックしてカメラを起動させる。
+    <br>2.背面カメラを選択する。
+    <br>3.四角い枠にQRコードを合わせて読み取る。
+    <br>4.読み取りに成功すると緑に点滅し、出席確認者に追加されます。
+    <h5>このシステムはhtml5-qrcodeライブラリを使用してます。</h5>
+    
+
+    <h3>出席確認者</h3>
+    <div id="result"></div>
+    </div>
+    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+    
+    <script>
+      let CURRENT_CODE = '';
+      let html5QrcodeScanner = new Html5QrcodeScanner("reader", { fps: 50, qrbox: 250 });
+      
+      let QRresult = document.querySelector('#result');
+      const append = (decodedText) => {
+        QRresult.innerHTML += `${decodedText}<br>`; 
+      };
+
+      const onScanSuccess = (decodedText) => {
+        console.log('onScanSuccess', decodedText, CURRENT_CODE);
+        if (CURRENT_CODE !== decodedText) {
+          CURRENT_CODE = decodedText;
+          append(decodedText);
+    
+          google.script.run
+            .withFailureHandler(function (error) {
+              append(`"${decodedText}"の保存に失敗しました: ${error}`);
+            })
+            .onScan(decodedText);
+        }
+      };
+
+      html5QrcodeScanner.render(onScanSuccess);
+    </script>
+  </body>
+</html>
